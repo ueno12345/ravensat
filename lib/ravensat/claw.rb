@@ -67,7 +67,7 @@ module Ravensat
         commander_variables += cmds
       end
 
-      formula &= at_most_k(commander_variables, k)
+      formula &= at_most_k(commander_variables, k) || Ravensat::NilNode.new
     end
 
     def self.exactly_one(bool_vars)
