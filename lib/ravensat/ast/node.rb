@@ -8,12 +8,18 @@ module Ravensat
     end
 
     def each_by_descriptive
+      if self.children.empty?
+        yield self
+        return
+      end
+
       node_stack = [[self, self.children.clone]] #[[parent, children], ...]
 
       until node_stack.empty?
         current_parent, current_children = node_stack.pop
         current_node = current_children.shift
 
+        next if current_node.nil?
         and_node_obj = AndNode.new
 
         case current_node
@@ -26,7 +32,6 @@ module Ravensat
         when NotNode
           yield(current_node)
           yield(current_node.children.first)
-
           if current_children.empty?
             yield(and_node_obj)
           else
@@ -35,7 +40,6 @@ module Ravensat
           end
         when VarNode, Extension::BooleanVariable
           yield(current_node)
-
           if current_children.empty?
             yield(and_node_obj)
           else
@@ -45,6 +49,44 @@ module Ravensat
         end
       end
     end
+#    def each_by_descriptive
+#      node_stack = [[self, self.children.clone]] #[[parent, children], ...]
+#
+#      until node_stack.empty?
+#        current_parent, current_children = node_stack.pop
+#        current_node = current_children.shift
+#
+#        and_node_obj = AndNode.new
+#
+#        case current_node
+#        when AndNode
+#          node_stack.push [current_parent, current_children.clone]
+#          node_stack.push [current_node, current_node.children.clone]
+#        when OrNode
+#          node_stack.push [current_parent, current_children.clone]
+#          node_stack.push [current_node, current_node.children.clone]
+#        when NotNode
+#          yield(current_node)
+#          yield(current_node.children.first)
+#
+#          if current_children.empty?
+#            yield(and_node_obj)
+#          else
+#            yield(current_parent)
+#            node_stack.push [current_parent, current_children.clone]
+#          end
+#        when VarNode, Extension::BooleanVariable
+#          yield(current_node)
+#
+#          if current_children.empty?
+#            yield(and_node_obj)
+#          else
+#            yield(current_parent)
+#            node_stack.push [current_parent, current_children.clone]
+#          end
+#        end
+#      end
+#    end
 
     def each
       return to_enum unless block_given?
